@@ -2,7 +2,7 @@
 
 % 1 Initialize
 S_0 = 100;
-N = 1000;
+N = 100;
 
 % 2 Generate x
 x(1) = 10^(-3) * S_0;
@@ -55,8 +55,8 @@ for i = 2:(N-1)
        A(3,j) = (x(j)-x(i))^2;
    end
    for j = 1:N
-   Lambda_Jx(i,j) = Lambda_J(i,j)*(x(j)-x(i));
-   Lambda_Jxx(i,j) = Lambda_Jx(i,j)*(x(j)-x(i));
+       Lambda_Jx(i,j) = Lambda_J(i,j)*(x(j)-x(i));
+       Lambda_Jxx(i,j) = Lambda_Jx(i,j)*(x(j)-x(i));
    end
     B = zeros(3,1);
     B(1,1)=0;
@@ -71,26 +71,113 @@ end
 % 4 Compute CTMC Markov process Generator G
 G = Lambda_D + Lambda_J
 
+
 % 5 Compute P
 T=1;
 n=N; %???????????
 delta = T/N;
-P = exp(delta*G)
+P = exp(delta*G) %????????????
 
 % 6 Compute f
-for c = 1:1000
-    for cc = 1:1000 
-        theta = 0.5 + 0.5i
-        z = 0.5 + 0.5i
-        mu = 0.5 + 0.5i
-        D = diag(x);
-        I = diag(ones(1,N));
+G = ones(N);    % FOR CODE BLOCK TEST, TO BE DELETED
 
-        % 6.1 Discrete case
-        f_d = inv(exp(1)^(theta*D) - z*P)
+D = diag(x);
+V = zeros(N,1);
 
-        % 6.2 Continuous case
-        f_c = inv(theta*D + mu*I-G)
+sum1 = zeros(N,1);
+
+% 6.1 Discrete case
+A = 20;
+t = 101 %strike price ????
+n = N %time ????
+rou = nthroot(exp(-A), 2*n)
+
+for j = 0:m1
+    theta = A1/(2*t1)-1i*pi/t1-1i*j*pi/t1;
+    for k = -n:(n-1)
+        z = rou*exp(1i*k*pi/n);
+        f_d = inv(exp(theta*D) - z*P)*ones(N,1); % use a/b instead of a*inv(b)
+        sum2 = sum2 + (-1)^(k+1)*f_d;
+    end
+    V = V + factorial(m1)/(factorial(j)*factorial(m1-j))*2^(-m1)*sum2;
+end
+for j = 0:m1
+    theta = A1/(2*t1)-1i*pi/t1-1i*(-j)*pi/t1;
+    for k = -n:(n-1)
+        z = rou*exp(1i*k*pi/n);
+        f_d = inv(exp(theta*D) - z*P)*ones(N,1); % use a/b instead of a*inv(b)
+        sum2 = sum2 + (-1)^(k+1)*f_d;
+    end
+    V = V + factorial(m1)/(factorial(j)*factorial(m1-j))*2^(-m1)*sum2;
+end
+
+V = exp(A/2)/(4*n*rou^n*t)*V;
+
+% 6.2 Continuous case
+A1 = 20;
+A2 = 20;
+t1 = n;    %time
+t2 = 101;    %strike price
+m1 = 10;
+m2 = 15;
+I = diag(ones(1,N));
+
+
+for j = 0:m1    %approximation 2.1
+    mu = A1/(2*t1)-1i*pi/t1-1i*j*pi/t1;
+    sum3 = zeros(N,1);
+    for jj = 0:j    %summation in approximation 2.1
+        sum2 = zeros(N,1);
+        for jjj = 0:m1    %approximation 1.1
+            sum1 = zeros(N,1);
+            for jjjj = 0:m2+jjj    %summation in approximation 1.1
+                theta = A2/(2*t2)-1i*pi/t2-1i*k*pi/t2;
+                f_c = inv(theta*D + mu*I-G)*ones(N,1); % use a/b instead of a*inv(b)
+                sum1 = sum1 + (-1)^jjjj*f_c;  
+            end       
+            sum2 = sum2 + factorial(m1)/(factorial(jjj)*factorial(m1-jjj))*2^(-m1)*sum1;
+        end
+        for jjj = 0:m1    %approximation 1.2
+            sum1 = zeros(N,1);
+            for jjjj = 0:m2+jjj    %summation in approximation 1.2
+                theta = A2/(2*t2)-1i*pi/t2-1i*(-k)*pi/t2;
+                f_c = inv(theta*D + mu*I-G)*ones(N,1); % use a/b instead of a*inv(b)
+                sum1 = sum1 + (-1)^jjjj*f_c;  
+            end       
+            sum2 = sum2 + factorial(m1)/(factorial(jjj)*factorial(m1-jjj))*2^(-m1)*sum1;
+        end
+        sum3 = sum3 + (-1)^jj*sum2;        
+    end
+    V = V + factorial(m1)/(factorial(j)*factorial(m1-j))*2^(-m1)*sum3;
+end
+for j = 0:m1    %approximation 2.2
+    mu = A1/(2*t1)-1i*pi/t1-1i*(-j)*pi/t1;
+    sum3 = zeros(N,1);
+    for jj = 0:j    %summation in approximation 2.2
+        sum2 = zeros(N,1);
+        for jjj = 0:m1    %approximation 1.1
+            sum1 = zeros(N,1);
+            for jjjj = 0:m2+jjj    %summation in approximation 1.1
+                theta = A2/(2*t2)-1i*pi/t2-1i*k*pi/t2;
+                f_c = inv(theta*D + mu*I-G)*ones(N,1); % use a/b instead of a*inv(b)
+                sum1 = sum1 + (-1)^jjjj*f_c;  
+            end       
+            sum2 = sum2 + factorial(m1)/(factorial(jjj)*factorial(m1-jjj))*2^(-m1)*sum1;
+        end
+        for jjj = 0:m1    %approximation 1.2
+            sum1 = zeros(N,1);
+            for jjjj = 0:m2+jjj    %summation in approximation 1.2
+                theta = A2/(2*t2)-1i*pi/t2-1i*(-k)*pi/t2;
+                f_c = inv(theta*D + mu*I-G)*ones(N,1); % use a/b instead of a*inv(b)
+                sum1 = sum1 + (-1)^jjjj*f_c;  
+            end       
+            sum2 = sum2 + factorial(m1)/(factorial(jjj)*factorial(m1-jjj))*2^(-m1)*sum1;
+        end
+        sum3 = sum3 + (-1)^jj*sum2;        
+    end
+    V = V + factorial(m1)/(factorial(j)*factorial(m1-j))*2^(-m1)*sum3;
+end
+V = exp((A1+A2)/2)/(4*t1*t2)*V;
 
 % 7.Compute L
 r = 0.05
