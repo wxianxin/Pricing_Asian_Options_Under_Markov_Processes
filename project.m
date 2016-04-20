@@ -4,9 +4,10 @@
 S_0 = 100;
 N = 10;
 K = 101;    %strike price
-T=1;    %tiem
+T=1;    %time
 r = 0.05;
-
+d = 0.00;
+delta = T/N;
 
 % 2 Generate x
 x(1) = 10^(-3) * S_0;
@@ -32,7 +33,7 @@ for i = 2:(N-1)
     for j = 1:N
         if i ~= j
             if j == 1
-                alphamin = 0;
+                alphamin = -1;
                 alphamax = rand*((x(j+1)/x(i))-(x(j)/x(i)))+(x(j)/x(i))-1;
             elseif j == N
                 alphamin = rand*((x(j)/x(i))-(x(j-1)/x(i)))+(x(j-1)/x(i))-1;
@@ -44,7 +45,7 @@ for i = 2:(N-1)
             end
         end
     end
-    Lambda_J(i,i) = sum(Lambda_J(i,:));
+    Lambda_J(i,i) = -sum(Lambda_J(i,:));
 end
 
 % 3.2 Compute TRIDIAGONAL Lambda_D matrix
@@ -79,7 +80,7 @@ G = Lambda_D + Lambda_J
 % 5 Compute P
 
 n=N; %???????????
-delta = T/N;
+
 P = exp(delta*G); %????????????
 
 % 6 Compute f->v
@@ -104,8 +105,8 @@ for j = 0:m1   %approximation
         for k = -n:(n-1)    %no approximation
             z = rou*exp(1i*k*pi/n);
             f_d = inv(exp(theta*D) - z*P)*ones(N,1); % use a/b instead of a*inv(b)
-            L_d = 1/(theta^2)*f_d - 1/((theta^2)*(1-z)) + (x')/(theta*(1-z)*(1-z*exp(r*delta_2)));
-            sum2 = sum2 + (-1)^(k+1)*L_d;
+            L_d = 1/(theta^2)*f_d - 1/((theta^2)*(1-z)) + (x')/(theta*(1-z)*(1-z*exp(r*delta)));
+            sum2 = sum2 + (-1)^k*L_d;
         end
         sum3 = sum3 + (-1)^jj*sum2;
     end
@@ -119,8 +120,8 @@ for j = 0:m1   %approximation
         for k = -n:(n-1)    %no approximation
             z = rou*exp(1i*k*pi/n);
             f_d = inv(exp(theta*D) - z*P)*ones(N,1); % use a/b instead of a*inv(b)
-            L_d = 1/(theta^2)*f_d - 1/((theta^2)*(1-z)) + (x')/(theta*(1-z)*(1-z*exp(r*delta_2)));
-            sum2 = sum2 + (-1)^(k+1)*L_d;
+            L_d = 1/(theta^2)*f_d - 1/((theta^2)*(1-z)) + (x')/(theta*(1-z)*(1-z*exp(r*delta)));
+            sum2 = sum2 + (-1)^k*L_d;
         end
         sum3 = sum3 + (-1)^jj*sum2;
     end
@@ -195,24 +196,8 @@ for j = 0:m1    %approximation 2.2
 end
 V = exp((A1+A2)/2)/(4*t1*t2)*V;
 
-% 7.Compute L
-r = 0.05;
-delta_2 = T/N;	%FUTURE CODE: What is the value of delta_2?
-
-% 7.1 Discrete case
-L_d = 1/(theta^2)*f_d - 1/((theta^2)*(1-z)) + (x')/(theta*(1-z)*(1-z*exp(r*delta_2)));
-
-% 7.2 Continuous case
-L_c = 1/(theta^2)*f_c - 1/((theta^2)*mu) + (x')/(theta*mu*(mu-r));
-
-% 9 Compute option price
-n = T/delta;
-d = 0.00;
-
 % 9.1 Discrete case
 V_d = (exp(-rT)/(n+1)) * v_d    %FUTURE CODE: Check the parameters
 
 % 9.2 Continuous case
 V_c = (exp(-rT)/T) * v_c    %FUTURE CODE: Check the parameters
-
-
