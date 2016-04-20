@@ -87,11 +87,11 @@ P = exp(delta*G); %????????????
 G = ones(N);    % FOR CODE BLOCK TEST, TO BE DELETED
 
 D = diag(x);
-V = zeros(N,1);
 m1 = 10;
 m2 = 15;
 
 % 6.1 Discrete case
+v_d = zeros(N,1);
 A = 20;
 n = T/delta; %discretization of time
 t = K/(n+1); %a form of strike price
@@ -110,7 +110,7 @@ for j = 0:m1   %approximation
         end
         sum3 = sum3 + (-1)^jj*sum2;
     end
-    V = V + factorial(m1)/(factorial(j)*factorial(m1-j))*2^(-m1)*sum3;
+    v_d = v_d + factorial(m1)/(factorial(j)*factorial(m1-j))*2^(-m1)*sum3;
 end
 for j = 0:m1   %approximation
     theta = A/(2*t)-1i*pi/t-1i*(-j)*pi/t;
@@ -125,11 +125,12 @@ for j = 0:m1   %approximation
         end
         sum3 = sum3 + (-1)^jj*sum2;
     end
-    V = V + factorial(m1)/(factorial(j)*factorial(m1-j))*2^(-m1)*sum3;
+    v_d = v_d + factorial(m1)/(factorial(j)*factorial(m1-j))*2^(-m1)*sum3;
 end
-V = exp(A/2)/(4*n*rou^n*t)*V;
+v_d = exp(A/2)/(4*n*rou^n*t)*v_d;
 
 % 6.2 Continuous case
+v_c = zeros(N,1);
 A1 = 20;
 A2 = 20;
 t1 = n;    %time
@@ -163,7 +164,7 @@ for j = 0:m1    %approximation 2.1
         end
         sum3 = sum3 + (-1)^jj*sum2;
     end
-    V = V + factorial(m1)/(factorial(j)*factorial(m1-j))*2^(-m1)*sum3;
+    v_c = v_c + factorial(m1)/(factorial(j)*factorial(m1-j))*2^(-m1)*sum3;
 end
 for j = 0:m1    %approximation 2.2
     mu = A1/(2*t1)-1i*pi/t1-1i*(-j)*pi/t1;
@@ -192,12 +193,12 @@ for j = 0:m1    %approximation 2.2
         end
         sum3 = sum3 + (-1)^jj*sum2;        
     end
-    V = V + factorial(m1)/(factorial(j)*factorial(m1-j))*2^(-m1)*sum3;
+    v_c = v_c + factorial(m1)/(factorial(j)*factorial(m1-j))*2^(-m1)*sum3;
 end
-V = exp((A1+A2)/2)/(4*t1*t2)*V;
+v_c = exp((A1+A2)/2)/(4*t1*t2)*v_c;
 
-% 9.1 Discrete case
+% 7.1 Discrete case
 V_d = (exp(-rT)/(n+1)) * v_d    %FUTURE CODE: Check the parameters
 
-% 9.2 Continuous case
+% 7.2 Continuous case
 V_c = (exp(-rT)/T) * v_c    %FUTURE CODE: Check the parameters
