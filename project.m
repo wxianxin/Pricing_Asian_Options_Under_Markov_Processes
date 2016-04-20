@@ -2,7 +2,11 @@
 
 % 1 Initialize
 S_0 = 100;
-N = 100;
+N = 10;
+K = 101;    %strike price
+T=1;    %tiem
+r = 0.05;
+
 
 % 2 Generate x
 x(1) = 10^(-3) * S_0;
@@ -73,7 +77,7 @@ G = Lambda_D + Lambda_J
 
 
 % 5 Compute P
-T=1;
+
 n=N; %???????????
 delta = T/N;
 P = exp(delta*G); %????????????
@@ -88,8 +92,8 @@ m2 = 15;
 
 % 6.1 Discrete case
 A = 20;
-t = 101; %strike price ????
-n = N; %time ????
+n = T/delta; %discretization of time
+t = K/(n+1); %a form of strike price
 rou = nthroot(exp(-A), 2*n);
 
 for j = 0:m1   %approximation
@@ -100,7 +104,8 @@ for j = 0:m1   %approximation
         for k = -n:(n-1)    %no approximation
             z = rou*exp(1i*k*pi/n);
             f_d = inv(exp(theta*D) - z*P)*ones(N,1); % use a/b instead of a*inv(b)
-            sum2 = sum2 + (-1)^(k+1)*f_d;
+            L_d = 1/(theta^2)*f_d - 1/((theta^2)*(1-z)) + (x')/(theta*(1-z)*(1-z*exp(r*delta_2)));
+            sum2 = sum2 + (-1)^(k+1)*L_d;
         end
         sum3 = sum3 + (-1)^jj*sum2;
     end
@@ -114,7 +119,8 @@ for j = 0:m1   %approximation
         for k = -n:(n-1)    %no approximation
             z = rou*exp(1i*k*pi/n);
             f_d = inv(exp(theta*D) - z*P)*ones(N,1); % use a/b instead of a*inv(b)
-            sum2 = sum2 + (-1)^(k+1)*f_d;
+            L_d = 1/(theta^2)*f_d - 1/((theta^2)*(1-z)) + (x')/(theta*(1-z)*(1-z*exp(r*delta_2)));
+            sum2 = sum2 + (-1)^(k+1)*L_d;
         end
         sum3 = sum3 + (-1)^jj*sum2;
     end
@@ -126,7 +132,7 @@ V = exp(A/2)/(4*n*rou^n*t)*V;
 A1 = 20;
 A2 = 20;
 t1 = n;    %time
-t2 = 101;    %strike price
+t2 = K/T;    %strike price
 I = diag(ones(1,N));
 
 for j = 0:m1    %approximation 2.1
@@ -137,18 +143,20 @@ for j = 0:m1    %approximation 2.1
         for jjj = 0:m1    %approximation 1.1
             sum1 = zeros(N,1);
             for jjjj = 0:m2+jjj    %summation in approximation 1.1
-                theta = A2/(2*t2)-1i*pi/t2-1i*k*pi/t2;
+                theta = A2/(2*t2)-1i*pi/t2-1i*jjjj*pi/t2;
                 f_c = inv(theta*D + mu*I-G)*ones(N,1); % use a/b instead of a*inv(b)
-                sum1 = sum1 + (-1)^jjjj*f_c;  
+                L_c = 1/(theta^2)*f_c - 1/((theta^2)*mu) + (x')/(theta*mu*(mu-r));
+                sum1 = sum1 + (-1)^jjjj*L_c;  
             end       
             sum2 = sum2 + factorial(m1)/(factorial(jjj)*factorial(m1-jjj))*2^(-m1)*sum1;
         end
         for jjj = 0:m1    %approximation 1.2
             sum1 = zeros(N,1);
             for jjjj = 0:m2+jjj    %summation in approximation 1.2
-                theta = A2/(2*t2)-1i*pi/t2-1i*(-k)*pi/t2;
+                theta = A2/(2*t2)-1i*pi/t2-1i*(-jjjj)*pi/t2;
                 f_c = inv(theta*D + mu*I-G)*ones(N,1); % use a/b instead of a*inv(b)
-                sum1 = sum1 + (-1)^jjjj*f_c;  
+                L_c = 1/(theta^2)*f_c - 1/((theta^2)*mu) + (x')/(theta*mu*(mu-r));
+                sum1 = sum1 + (-1)^jjjj*L_c;  
             end       
             sum2 = sum2 + factorial(m1)/(factorial(jjj)*factorial(m1-jjj))*2^(-m1)*sum1;
         end
@@ -164,18 +172,20 @@ for j = 0:m1    %approximation 2.2
         for jjj = 0:m1    %approximation 1.1
             sum1 = zeros(N,1);
             for jjjj = 0:m2+jjj    %summation in approximation 1.1
-                theta = A2/(2*t2)-1i*pi/t2-1i*k*pi/t2;
+                theta = A2/(2*t2)-1i*pi/t2-1i*jjjj*pi/t2;
                 f_c = inv(theta*D + mu*I-G)*ones(N,1); % use a/b instead of a*inv(b)
-                sum1 = sum1 + (-1)^jjjj*f_c;  
+                L_c = 1/(theta^2)*f_c - 1/((theta^2)*mu) + (x')/(theta*mu*(mu-r));
+                sum1 = sum1 + (-1)^jjjj*L_c;  
             end       
             sum2 = sum2 + factorial(m1)/(factorial(jjj)*factorial(m1-jjj))*2^(-m1)*sum1;
         end
         for jjj = 0:m1    %approximation 1.2
             sum1 = zeros(N,1);
             for jjjj = 0:m2+jjj    %summation in approximation 1.2
-                theta = A2/(2*t2)-1i*pi/t2-1i*(-k)*pi/t2;
+                theta = A2/(2*t2)-1i*pi/t2-1i*(-jjjj)*pi/t2;
                 f_c = inv(theta*D + mu*I-G)*ones(N,1); % use a/b instead of a*inv(b)
-                sum1 = sum1 + (-1)^jjjj*f_c;  
+                L_c = 1/(theta^2)*f_c - 1/((theta^2)*mu) + (x')/(theta*mu*(mu-r));
+                sum1 = sum1 + (-1)^jjjj*L_c;  
             end       
             sum2 = sum2 + factorial(m1)/(factorial(jjj)*factorial(m1-jjj))*2^(-m1)*sum1;
         end
@@ -187,25 +197,17 @@ V = exp((A1+A2)/2)/(4*t1*t2)*V;
 
 % 7.Compute L
 r = 0.05;
-delta_2 = %FUTURE CODE: What is the value of delta_2?
+delta_2 = T/N;	%FUTURE CODE: What is the value of delta_2?
 
 % 7.1 Discrete case
-L_d = 1/(theta^2)*f_d - 1/((theta^2)(1-z)) + x/(theta*(1-z)*(1-z*exp(r*delta_2)));
+L_d = 1/(theta^2)*f_d - 1/((theta^2)*(1-z)) + (x')/(theta*(1-z)*(1-z*exp(r*delta_2)));
 
 % 7.2 Continuous case
-L_c = 1/(theta^2)*f_c - 1/((theta^2)*mu) + x/(theta*mu*(mu-r));
-
-% 8 Compute inverse double transforms
-
-% 8.1 Discrete case
-v_d = %FUTURE CODE
-
-% 8.2 Continuous case
-v_c = %FUTURE CODE
+L_c = 1/(theta^2)*f_c - 1/((theta^2)*mu) + (x')/(theta*mu*(mu-r));
 
 % 9 Compute option price
 n = T/delta;
-d = 0.00
+d = 0.00;
 
 % 9.1 Discrete case
 V_d = (exp(-rT)/(n+1)) * v_d    %FUTURE CODE: Check the parameters
