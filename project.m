@@ -1,13 +1,14 @@
-% Date: 20160419
+% Date: 20160420
 
 % 1 Initialize
 S_0 = 100;
-N = 10;
-K = 101;    %strike price
 T=1;    %time
-r = 0.05;
-d = 0.00;
+N = 50; %Number of price states
+n = 12; %Discretization of time
+K = 101;    %strike price
 delta = T/N;
+r = 0.0367;
+d = 0.00;
 
 % 2 Generate x
 x(1) = 10^(-3) * S_0;
@@ -23,7 +24,11 @@ end
 %Need to define v(dy)
 %Need code to compute integral y^2*v(dy) from -1 to infinity
 %Need constants sigma,r,d
-
+%for MJD levy integral = lambda(e^(2mu+d^2)*e^(d^2)-1)
+mu = -.390078; %mu is alpha in the paper
+levy = .174814*((exp(2*mu+(.338796^2)*(exp(.338796^2)-1)))+(exp(2*mu+.5*(.338796)^2)-1)^2);
+%MJD v(dy)
+fun = @(y,lambda,del,alpha) lambda/(y+1)*1/((2*pi)^.5)/del*exp(-(log(y+1)-alpha)^2/2*(del^2));
 % 3 Compute Lambda Matrices
 Lambda_J = zeros(N);
 Lambda_D = zeros(N);
@@ -37,7 +42,7 @@ for i = 2:(N-1)
                 alphamax = rand*((x(j+1)/x(i))-(x(j)/x(i)))+(x(j)/x(i))-1;
             elseif j == N
                 alphamin = rand*((x(j)/x(i))-(x(j-1)/x(i)))+(x(j-1)/x(i))-1;
-                Lambda_J(i,j) = integral(fun,alphamin,Inf); %fun = v(dy)
+                Lambda_J(i,j) = integral(@(y)fun(y,.174814,.338796,-.390078),alphamin,Inf); %fun = v(dy)
             else
                 alphamin = rand*((x(j)/x(i))-(x(j-1)/x(i)))+(x(j-1)/x(i))-1;
                 alphamax = rand*((x(j+1)/x(i))-(x(j)/x(i)))+(x(j)/x(i))-1;
@@ -60,8 +65,8 @@ for i = 2:(N-1)
        A(3,j) = (x(j)-x(i))^2;
    end
    for j = 1:N
-       Lambda_Jx(i,j) = Lambda_J(i,j)*(x(j)-x(i));
-       Lambda_Jxx(i,j) = Lambda_Jx(i,j)*(x(j)-x(i));
+   Lambda_Jx(i,j) = Lambda_J(i,j)*(x(j)-x(i));
+   Lambda_Jxx(i,j) = Lambda_Jx(i,j)*(x(j)-x(i));
    end
     B = zeros(3,1);
     B(1,1)=0;
@@ -72,15 +77,11 @@ for i = 2:(N-1)
     R = linsolve(A,B);
     Lambda_D(i,:) = R;
 end
-
 % 4 Compute CTMC Markov process Generator G
 G = Lambda_D + Lambda_J
 
 
 % 5 Compute P
-
-n=N; %???????????
-
 P = exp(delta*G); %????????????
 
 % 6 Compute f->v
@@ -104,7 +105,7 @@ for j = 0:m1   %approximation
         sum2 = zeros(N,1);
         for k = -n:(n-1)    %no approximation
             z = rou*exp(1i*k*pi/n);
-            f_d = inv(exp(theta*D) - z*P)*ones(N,1); % use a/b instead of a*inv(b)
+            f_d = I/(exp(theta*D) - z*P)*ones(N,1);
             L_d = 1/(theta^2)*f_d - 1/((theta^2)*(1-z)) + (x')/(theta*(1-z)*(1-z*exp(r*delta)));
             sum2 = sum2 + (-1)^k*L_d;
         end
@@ -119,7 +120,7 @@ for j = 0:m1   %approximation
         sum2 = zeros(N,1);
         for k = -n:(n-1)    %no approximation
             z = rou*exp(1i*k*pi/n);
-            f_d = inv(exp(theta*D) - z*P)*ones(N,1); % use a/b instead of a*inv(b)
+            f_d = I/(exp(theta*D) - z*P)*ones(N,1);
             L_d = 1/(theta^2)*f_d - 1/((theta^2)*(1-z)) + (x')/(theta*(1-z)*(1-z*exp(r*delta)));
             sum2 = sum2 + (-1)^k*L_d;
         end
@@ -146,7 +147,7 @@ for j = 0:m1    %approximation 2.1
             sum1 = zeros(N,1);
             for jjjj = 0:m2+jjj    %summation in approximation 1.1
                 theta = A2/(2*t2)-1i*pi/t2-1i*jjjj*pi/t2;
-                f_c = inv(theta*D + mu*I-G)*ones(N,1); % use a/b instead of a*inv(b)
+                f_c = I/(theta*D + mu*I-G)*ones(N,1);
                 L_c = 1/(theta^2)*f_c - 1/((theta^2)*mu) + (x')/(theta*mu*(mu-r));
                 sum1 = sum1 + (-1)^jjjj*L_c;  
             end       
@@ -156,7 +157,7 @@ for j = 0:m1    %approximation 2.1
             sum1 = zeros(N,1);
             for jjjj = 0:m2+jjj    %summation in approximation 1.2
                 theta = A2/(2*t2)-1i*pi/t2-1i*(-jjjj)*pi/t2;
-                f_c = inv(theta*D + mu*I-G)*ones(N,1); % use a/b instead of a*inv(b)
+                f_c = I/(theta*D + mu*I-G)*ones(N,1);
                 L_c = 1/(theta^2)*f_c - 1/((theta^2)*mu) + (x')/(theta*mu*(mu-r));
                 sum1 = sum1 + (-1)^jjjj*L_c;  
             end       
@@ -175,9 +176,10 @@ for j = 0:m1    %approximation 2.2
             sum1 = zeros(N,1);
             for jjjj = 0:m2+jjj    %summation in approximation 1.1
                 theta = A2/(2*t2)-1i*pi/t2-1i*jjjj*pi/t2;
-                f_c = inv(theta*D + mu*I-G)*ones(N,1); % use a/b instead of a*inv(b)
+                f_c = I/(theta*D + mu*I-G)*ones(N,1);
                 L_c = 1/(theta^2)*f_c - 1/((theta^2)*mu) + (x')/(theta*mu*(mu-r));
-                sum1 = sum1 + (-1)^jjjj*L_c;  
+                sum1 = sum1 + (-1)^jjjj*L_c;
+
             end       
             sum2 = sum2 + factorial(m1)/(factorial(jjj)*factorial(m1-jjj))*2^(-m1)*sum1;
         end
@@ -185,7 +187,7 @@ for j = 0:m1    %approximation 2.2
             sum1 = zeros(N,1);
             for jjjj = 0:m2+jjj    %summation in approximation 1.2
                 theta = A2/(2*t2)-1i*pi/t2-1i*(-jjjj)*pi/t2;
-                f_c = inv(theta*D + mu*I-G)*ones(N,1); % use a/b instead of a*inv(b)
+                f_c = I/(theta*D + mu*I-G)*ones(N,1);
                 L_c = 1/(theta^2)*f_c - 1/((theta^2)*mu) + (x')/(theta*mu*(mu-r));
                 sum1 = sum1 + (-1)^jjjj*L_c;  
             end       
@@ -198,7 +200,7 @@ end
 v_c = exp((A1+A2)/2)/(4*t1*t2)*v_c;
 
 % 7.1 Discrete case
-V_d = (exp(-rT)/(n+1)) * v_d    %FUTURE CODE: Check the parameters
+V_d = (exp(-r*T)/(n+1)) * v_d    %FUTURE CODE: Check the parameters
 
 % 7.2 Continuous case
-V_c = (exp(-rT)/T) * v_c    %FUTURE CODE: Check the parameters
+V_c = (exp(-r*T)/T) * v_c    %FUTURE CODE: Check the parameters
