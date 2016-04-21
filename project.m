@@ -200,7 +200,7 @@ end
 v_c = exp((A1+A2)/2)/(4*t1*t2)*v_c;
 
 % 7.1 Discrete case
-V_d = (exp(-r*T)/(n+1)) * v_d    %FUTURE CODE: Check the parameters
+V_d = (exp(-r*T)/(n+1)) * v_d;    %FUTURE CODE: Check the parameters
 
 % 7.2 Continuous case
-V_c = (exp(-r*T)/T) * v_c    %FUTURE CODE: Check the parameters
+V_c = (exp(-r*T)/T) * v_c;    %FUTURE CODE: Check the parameters
