@@ -8,9 +8,10 @@ x = x;
 %Need to define v(dy)
 %Need code to compute integral y^2*v(dy) from -1 to infinity
 %Need constants sigma,r,d
-sigma = .1; %???
+sigma = .126349; %???
 mu = -.390078; %mu is alpha in the paper
-levy = .174814*((exp(2*mu+(.338796^2)*(exp(.338796^2)-1)))+(exp(2*mu+.5*(.338796)^2)-1)^2);
+%levy = .174814*((exp(2*mu+(.338796^2)*(exp(.338796^2)-1)))+(exp(2*mu+.5*(.338796)^2)-1)^2);
+levy = .174814*(exp(2*mu+.338796^2)*(exp(.338796^2)-1)+(exp(mu+.5*(.338796)^2)-1)^2);
 
 %MJD v(dy)
 fun = @(x,lambda,del,alpha) lambda./(x+1).*1./((2*3.1416)^.5)/del.*exp(-(log(x+1)-alpha).^2./2*(del.^2));

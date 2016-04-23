@@ -14,8 +14,8 @@ D = diag(x);
 v_c = zeros(N,1);
 A1 = 20;
 A2 = 20;
-t1 = n;    %time
-t2 = K/T;    %strike price
+t1 = T;    %time
+t2 = K*T;    %strike price
 
 for j = 0:m1    %approximation 2.1
     mu = A1/(2*t1)-1i*pi/t1-1i*j*pi/t1;

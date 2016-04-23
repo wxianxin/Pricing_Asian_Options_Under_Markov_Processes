@@ -5,8 +5,8 @@ S_0 = 100;
 N = 50; %Number of price states
 T=1;    %time
 n = 12; %Discretization of time
-K = 101;    %strike price
-delta = T/N;
+K = 100;    %strike price
+delta = T/n;
 r = 0.0367;
 d = 0.00;
 
