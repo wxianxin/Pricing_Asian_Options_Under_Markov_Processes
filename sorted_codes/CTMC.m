@@ -5,17 +5,14 @@ r = r;
 d = d;
 x = x;
 
-%Need to define v(dy)
-%Need code to compute integral y^2*v(dy) from -1 to infinity
 %Need constants sigma,r,d
-sigma = .126349; %???
+sigma = .1; %???
 mu = -.390078; %mu is alpha in the paper
-%levy = .174814*((exp(2*mu+(.338796^2)*(exp(.338796^2)-1)))+(exp(2*mu+.5*(.338796)^2)-1)^2);
-levy = .174814*(exp(2*mu+.338796^2)*(exp(.338796^2)-1)+(exp(mu+.5*(.338796)^2)-1)^2);
-
+littlesigma = .338796;
+lambda = .17814;
+levy = lambda*((exp(2*mu+(littlesigma^2))*(exp(littlesigma^2)-1))+(exp(mu+.5*littlesigma^2)-1)^2);
 %MJD v(dy)
 fun = @(x,lambda,del,alpha) lambda./(x+1).*1./((2*3.1416)^.5)/del.*exp(-(log(x+1)-alpha).^2./2*(del.^2));
-
 % 3 Compute Lambda Matrices
 Lambda_J = zeros(N);
 Lambda_D = zeros(N);
@@ -52,19 +49,21 @@ for i = 2:(N-1)
        A(3,j) = (x(j)-x(i))^2;
    end
    for j = 1:N
-   Lambda_Jx(i,j) = Lambda_J(i,j)*(x(j)-x(i));
-   Lambda_Jxx(i,j) = Lambda_Jx(i,j)*(x(j)-x(i));
+    Lambda_Jx(i,j) = Lambda_J(i,j)*(x(j)-x(i));
+    Lambda_Jxx(i,j) = Lambda_Jx(i,j)*(x(j)-x(i));
    end
     B = zeros(3,1);
     B(1,1)=0;
     %need levy constant (integral), sigma, r, d
     B(2,1)= (r-d)*x(i)-sum(Lambda_Jx(i,:));
-    %MJD sigma(xi)^2 = sigma^2 xi^2
-    B(3,1)= x(i)*x(i)*((sigma*x(i))^2+levy)-sum(Lambda_Jxx(i,j));
+    %MJD sigma(xi)^2 = sigma^2
+    B(3,1)= x(i)*x(i)*((sigma)^2+levy)-sum(Lambda_Jxx(i,:));
+end
     %solve
     R = linsolve(A,B);
-    Lambda_D(i,:) = R;
-end
+    for i = 2:(N-1)
+        Lambda_D(i,:) = R;
+    end
 
 % 4 Compute CTMC Markov process Generator G
 G = Lambda_D + Lambda_J;

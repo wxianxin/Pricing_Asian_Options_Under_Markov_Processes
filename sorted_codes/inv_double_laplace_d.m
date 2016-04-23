@@ -52,5 +52,4 @@ for j = 1:m1   %approximation
 end
 v_d = -exp(A/2)/(4*n*rou^n*t)*v_d;
 
-
 end
