@@ -13,8 +13,7 @@ d = 0.00;
 x = x_generator(S_0,N);
 G = CTMC(N, r, d, x);
 
-%v_d = inv_double_laplace_d(N,T,n,K,r,x,G);
-v_d = ilaplace(ilaplace(L_d,j,t)k,n)
+v_d = inv_double_laplace_d(N,T,n,K,r,x,G);
 V_d = (exp(-r*T)/(n+1)) * v_d;
 
 v_c = inv_double_laplace_c(N,T,n,K,r,x,G);
