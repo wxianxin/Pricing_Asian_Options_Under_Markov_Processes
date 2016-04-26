@@ -6,9 +6,9 @@ K = 100;       % Strike at expiry
 sigma = 0.3;    % expected vol.
 r = 0.0367;
 T = 1;
-m = 250; %Number of periods of calculation
+m = 12; %Number of periods of calculation
 dt = T/m;
-N = 1000;
+N = 10000;
 theta = 1;
 
 
