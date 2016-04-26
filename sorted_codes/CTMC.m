@@ -1,16 +1,12 @@
 function G = CTMC(N,r,d,x)
 
-N = N;
-r = r;
-d = d;
-x = x;
 
 %Need constants sigma,r,d
-sigma = .1; %???
-mu = -.390078; %mu is alpha in the paper
+sigma = .126349; %???
+alpha = -.390078; %mu is alpha in the paper
 littlesigma = .338796;
-lambda = .126349;
-levy = lambda*((exp(2*mu+(littlesigma^2))*(exp(littlesigma^2)-1))+(exp(mu+.5*littlesigma^2)-1)^2);
+lambda = .174814;
+levy = lambda*((exp(2*alpha+(littlesigma^2))*(exp(littlesigma^2)-1))+(exp(alpha+.5*littlesigma^2)-1)^2);
 %MJD v(dy)
 fun = @(x,lambda,del,alpha) lambda./(x+1).*1./((2*3.1416)^.5)/del.*exp(-(log(x+1)-alpha).^2./2*(del.^2));
 % 3 Compute Lambda Matrices
@@ -24,14 +20,14 @@ for i=2:N-1
           if j==1
           alphamin =0;
           alphamax = rand*((x(j+1)/x(i))-(x(j)/x(i)))+(x(j)/x(i))-1;
-          Lambda_J(i,j)=lambda*(normcdf(alphamax,mu,littlesigma)-normcdf(alphamin,mu,littlesigma));
+          Lambda_J(i,j)=lambda*(normcdf(alphamax,alpha,littlesigma)-normcdf(alphamin,alpha,littlesigma));
           elseif j==N 
           alphamin = rand*((x(j)/x(i))-(x(j-1)/x(i)))+(x(j-1)/x(i))-1;
-          Lambda_J(i,j)=lambda*(1-normcdf(alphamin,mu,littlesigma));
+          Lambda_J(i,j)=lambda*(1-normcdf(alphamin,alpha,littlesigma));
           else
           alphamin = rand*((x(j)/x(i))-(x(j-1)/x(i)))+(x(j-1)/x(i))-1;    
           alphamax = rand*((x(j+1)/x(i))-(x(j)/x(i)))+(x(j)/x(i))-1;
-          Lambda_J(i,j)=lambda*(normcdf(alphamax,mu,littlesigma)-normcdf(alphamin,mu,littlesigma));
+          Lambda_J(i,j)=lambda*(normcdf(alphamax,alpha,littlesigma)-normcdf(alphamin,alpha,littlesigma));
           end
        else
           Lambda_J(i,j) = -sum(Lambda_J(i,:));
@@ -74,7 +70,7 @@ end
       Jx=Lambda_J(i,i-1)*(x(i-1)-x(i))+Lambda_J(i,i)*(x(i)-x(i))+Lambda_J(i,i+1)*(x(i+1)-x(i));
       B(2)=(r-d)*x(i)-Jx;
       Jxx=Lambda_J(i,i-1)*(x(i-1)-x(i))^2+Lambda_J(i,i)*(x(i)-x(i))^2+Lambda_J(i,i+1)*(x(i+1)-x(i))^2;
-      levy = lambda*(exp(2*mu+littlesigma^2)*(exp(littlesigma^2)-1)+(exp(mu+.5*(littlesigma^2))-1)^2);
+      levy = lambda*(exp(2*alpha+littlesigma^2)*(exp(littlesigma^2)-1)+(exp(alpha+.5*(littlesigma^2))-1)^2);
       B(3)=x(i)^2*(sigma^2+levy)-Jxx;
       %solve the equation
       R =linsolve(A,B);

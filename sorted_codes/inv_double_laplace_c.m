@@ -1,22 +1,36 @@
-function  v_c = inv_double_laplace_c(N,T,n,K,r,x,G)
+function  v_c = inv_double_laplace_c(N,T,n,K,r,x,G,nruns)
 % 6 Compute f->v
 % Continuous case
-N = N;
-T = T;
-n = n;
-K = K;
-r = r;
-x = x;
 m1 = 10;
 m2 = 15;
-I = diag(ones(1,N));
+I = eye(N);
 D = diag(x);
 v_c = zeros(N,1);
 A1 = 20;
 A2 = 20;
-t1 = T;    %time
-t2 = K*T;    %strike price
+A = 20;
+t1 = K;    %strike price
+t2 = T;    %time
+l1 = 3;
+l2 = l1;
 
+%Truncation
+for j = -nruns:nruns    
+    theta = A/(2*l1*t1)-1i*j*pi/l1/t1;
+    sum2 = zeros(N,1);
+    for k = -nruns:nruns
+        mu = A2/(2*l2*t2)-1i*k*pi/l2/t2;
+        f_dc = (theta*D + mu*I-G)\ones(N,1);
+        L_c = 1/(theta^2)*f_dc - 1/((theta^2)*(mu)) + (x')/(theta*(mu)*(mu-r));
+        sum2 = sum2 + exp(-1i*k*pi/l2)*L_c;
+    end
+    v_c = v_c + exp(-1i*j*pi/l1)*sum2;
+end
+v_c = exp(A/l1)/(4*l1*l2*t2*t1)*v_c;
+
+%v_c = exp(0.5*A1/l1)/(2*l1*t1) * v_c;
+%Double inverse Laplace transform with Euler Approximation
+%{
 for j = 0:m1    %approximation 2.1
     sum3 = zeros(N,1);
     for jj = 0:m2+j    %summation in approximation 2.1
@@ -77,4 +91,6 @@ for j = 1:m1    %approximation 2.2
     v_c = v_c + factorial(m1)/(factorial(j)*factorial(m1-j))*2^(-m1)*sum3;
 end
 v_c = exp((A1+A2)/2)/(4*t1*t2)*v_c;
+%}
+
 end
