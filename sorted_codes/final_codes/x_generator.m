@@ -1,6 +1,7 @@
 % 2 Generate x
 function x = x_generator(S_0,N)
-
+%x(1) = 0.9*S_0;
+%x(N) = 1.1*S_0;
 x(1) = 10^(-3) * S_0;
 x(N) = 4 * S_0;
 for k = 2:(N-1)

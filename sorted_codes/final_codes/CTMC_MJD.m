@@ -1,10 +1,5 @@
 function G = CTMC_MJD(N,r,d,x)
 
-N = N;
-r = r;
-d = d;
-x = x;
-
 %Need constants sigma,r,d
 sigma = .126349; 
 alpha = -.390078; 
